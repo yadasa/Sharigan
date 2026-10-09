@@ -268,7 +268,7 @@ function renderJob(data) {
   const events = [...(data.job.events || []), ...(data.hd.events || [])].sort((a,b) => a.time.localeCompare(b.time));
   $('#activity-panel').hidden = !events.length;
   $('#activity').replaceChildren(...events.map(event => { const li = document.createElement('li'), time = document.createElement('time'); time.dateTime = event.time; time.textContent = new Date(event.time).toLocaleTimeString(); li.append(time, document.createTextNode(event.message)); return li; }));
-  const active = data.hd.state === 'running' || data.hd.state === 'error' ? data.hd : data.job;
+  const active = data.hd.state !== 'idle' ? data.hd : data.job;
   if (actionError) status(actionError, true); else status(active.status, ['error','interrupted'].includes(active.state));
   updateButtons();
 }
