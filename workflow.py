@@ -35,23 +35,8 @@ elif a.command=='review':
  from mask_review import review
  print(review(folder,a.approve,a.note,a.fingerprint))
 elif a.command=='repair-rgb':
- from mask_review import is_mesh
- mode=json.loads((folder/'workflow-mode.json').read_text()).get('mode') if (folder/'workflow-mode.json').exists() else 'depth'
- if mode=='face_mesh':p.error('Fast face mesh has no SAM mask. Reprepare facial tracking instead.')
- from raw_masks import segment_raw,clean_border_fragments
- from pipeline import composite
- from audio_workflow import prepare_seedance_video
- meta=json.loads((folder/'manifest.json').read_text());repair=folder/'rgb-repair';repair.mkdir(exist_ok=True)
- masks=clean_border_fragments(segment_raw(folder/'original.mp4',repair,meta.get('prompt','person')))
- composite(folder/'original.mp4',folder/'depth.mp4',masks,folder,folder/'upload.mp4')
- if mode=='depth_mesh':
-  import shutil,subprocess
-  shutil.copy2(folder/'composite-silent.mp4',folder/'depth-composite-silent.mp4')
-  subprocess.run([str(ROOT/'.venv-face/bin/python'),str(ROOT/'mesh_worker.py'),str(folder),'--depth'],check=True)
- prepare_seedance_video(folder)
- (folder/'mask-review.json').unlink(missing_ok=True)
- meta['mask_method']='SAM 3 on original RGB, preserving depth colors';(folder/'manifest.json').write_text(json.dumps(meta,indent=2))
- print('Repaired. Review the entire clip again; approval cleared.')
+ from studio import repair_rgb
+ repair_rgb(folder)
 else:
  from seedance_bridge import submit,submit_hd,wait_and_finish
  if a.command=='submit':
