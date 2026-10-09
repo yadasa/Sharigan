@@ -10,10 +10,10 @@ Mesh modes remain experimental for one centered speaker. Public hosting availabi
 
 ## Local verification on 2026-10-09
 
-- 29 automated tests passed on Windows with Python 3.12.8 and the pinned requirements.
+- 50 automated tests passed on Windows with Python 3.12.8 and the pinned requirements after the studio workflow update.
 - The standalone compositor check passed, including subject selection, retained background and aligned output frames.
-- JavaScript syntax checking passed. The localhost health/static routes and generic reference form schema passed.
-- Desktop and 390-pixel mobile layouts were visually inspected in Chrome. The configuration modal and opt-in sound toggle worked, with no captured browser console errors.
+- JavaScript syntax checking passed. The localhost health/static routes and generic reference preview schema passed. Tests verify exact preview/submission parity, stale input/reference/model rejection, single paid submission, repair approval invalidation, task collection without resubmission, history persistence, WebM identity conversion and imported/completed-result upgrade guards.
+- Desktop and narrow mobile layouts were inspected in Chrome, including a 390-pixel iframe viewport with all four navigation steps visible and no horizontal overflow. Synthetic media in a separate fixture server covered video references, subject mapping, complete prompt preview, draft/final selection, frame stepping, audio players and searchable history. External requests were blocked in that fixture server. No captured browser console errors occurred.
 - Source scan found no previous company/provider branding. Only current source/assets are committed; credentials, runtime jobs and environments are ignored.
 - No paid Seedance or preprocessing job was submitted. This machine currently lacks Rubber Band and populated provider keys; the local UI is running, while generation readiness still requires those prerequisites. Optional mesh worker setup was not performed.
 
