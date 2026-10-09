@@ -1,6 +1,6 @@
 <p align="center"><img src="static/sharingan.svg" width="100" alt="Sharingan eye emblem"></p>
 <h1 align="center">Sharingan</h1>
-<p align="center"><strong>A new identity. The same story.</strong></p>
+<p align="center"><strong>Replace characters in your video with your own identity references.</strong></p>
 <p align="center">An open-source, local video transformation studio with direct Seedance API access.</p>
 <p align="center"><a href="docs/SETUP-AGENT.md">Setup</a> · <a href="docs/SEEDANCE-API.md">API integration</a> · <a href="docs/AGENT-OPERATIONS.md">Agent workflow</a> · <a href="LICENSE">MIT license</a></p>
 
@@ -49,17 +49,19 @@ REPLICATE_API_TOKEN=your_replicate_token
 
 Get your [ModelArk API key](https://ai.byteplus.com/ark/region:ap-southeast-1/apikey) and [Replicate token](https://replicate.com/account/api-tokens). Enable **Dreamina Seedance 2.5** in your ModelArk account and ensure the account can use paid inference. The default model is `dreamina-seedance-2-5-260628` and the API base is `https://ark.ap-southeast.bytepluses.com/api/v3`. `SEEDANCE_MODEL` and `SEEDANCE_BASE_URL` are configurable for a compatible ModelArk deployment. Older Seedance models do not support this complete video-editing/draft workflow.
 
-Replicate supplies Demucs vocal separation, colored depth and SAM 3 preprocessing. `HF_TOKEN` is optional for an alternate hosted depth model. The configuration dialog shows only key presence, never key values. Run `python doctor.py --require-keys` using your virtual environment to check local dependencies and key presence without paid inference.
+Replicate supplies Demucs vocal separation, colored depth and SAM 3 preprocessing. `HF_TOKEN` is optional for an alternate hosted depth model. **API configuration** checks local packages, Rubber Band, provider key presence, media-host settings and the optional mesh worker. It shows no key values and does not verify remote access or balance. Unavailable preparation modes stay disabled until their requirements are ready. You can also run `python doctor.py --require-keys` using your virtual environment.
 
 ## Workflow
 
-1. Upload an MP4/MOV with audio, 4–30 seconds long.
+1. Choose an MP4, MOV or WebM with audio, 4–30 seconds long. Inspect its preview, duration, resolution and audio checks before preparing. Source audio must be compatible with unchanged copying into MP4; export with AAC audio if necessary.
 2. Choose **Depth + SAM**, **Face mesh**, or **Depth + face mesh**. Mesh modes require the optional worker and are experimental for a single centered speaker.
 3. Preserve the source, isolate vocals, pitch them +3 semitones without changing timing, and embed those vocals in the prepared video. Preserve the depth model's colors.
-4. Inspect the **whole** prepared clip and its audio. Approval is tied to artifact hashes and becomes invalid after changes.
-5. Supply your own character image or MP4/MOV identity reference; optionally add a second character image. Review the prompt and explicitly create a paid 480p draft.
+4. Inspect the **whole** prepared clip and its audio. Compare it with the original, step through individual frames and listen to the audio stems. Approval is tied to artifact hashes and becomes invalid after changes. **Needs fixing** blocks generation; **Repair mask from original video** rebuilds RGB segmentation for depth modes and requires another full review. Repair may use provider credits.
+5. Supply a character image or MP4/MOV/WebM identity video; optionally add a second image. Explicitly describe which subject each reference replaces. WebM identity references are converted to MP4 video. **Review submission** validates the inputs locally and shows the exact prompt, including appended guidance. Confirm separately to start one paid 480p draft.
 6. Retrieve the result and restore the complete original source soundtrack, discarding generated audio.
-7. If satisfied, explicitly approve a separate paid 1080p final. The draft remains available, and original audio is restored again. ModelArk draft IDs expire after seven days.
+7. If satisfied, explicitly approve a separate paid 1080p final. Switch between the preserved draft and final using the version selector. Original audio is restored again. ModelArk draft IDs expire after seven days. Imported external results have no direct-API draft ID and cannot be upgraded through this control.
+
+Open **Recent transformations** to search saved jobs and continue reviewing or collecting them. Name a transformation from its header, inspect **Processing activity**, or use **New variation from this source** to load the source and references for a fresh job. The four-step progress navigation remains visible on mobile. See the [studio guide](docs/STUDIO.md) for recovery and review details.
 
 Video identity references remain videos. The prepared source is `@Video1`; a video identity is `@Video2` and contributes appearance only. With an image identity, use `@Image1`; a second image is `@Image2` (or `@Image1` when the primary identity is a video). Both reference types use the direct API's video-editing task.
 
