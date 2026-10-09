@@ -5,6 +5,7 @@ import json
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 from config import ROOT, setting
@@ -104,6 +105,20 @@ def media_info(path, source=False):
         issues.append('Use an aspect ratio between 0.4 and 2.5.')
     if source and not info['audio']:
         issues.append('The source needs an audio track for vocal separation and soundtrack restoration.')
+    if source and info['audio']:
+        # Verify the original compressed audio can be copied unchanged into MP4.
+        # This is especially useful for MOV/WebM codecs; it makes no API calls.
+        try:
+            with tempfile.TemporaryDirectory() as directory, av.open(str(path)) as audio_source:
+                with av.open(str(Path(directory) / 'audio-check.mp4'), 'w') as output:
+                    stream = output.add_stream_from_template(audio_source.streams.audio[0])
+                    for packet in audio_source.demux(audio=0):
+                        if packet.dts is not None:
+                            packet.stream = stream
+                            output.mux(packet)
+                            break
+        except (av.error.FFmpegError, ValueError):
+            issues.append('The source audio codec cannot be copied unchanged into MP4. Export a source with AAC audio before preparing.')
     if info['bytes'] > 200 * 1024 * 1024:
         issues.append('Use a video smaller than 200 MB.')
     info['issues'] = issues
