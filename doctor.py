@@ -13,8 +13,9 @@ def main():
     if args.mesh:
         from pathlib import Path
         import subprocess
-        worker=Path(__file__).resolve().parent/'.venv-face/bin/python'
-        ready=worker.exists() and subprocess.run([str(worker),'-c','import mediapipe,av,PIL,numpy'],capture_output=True).returncode==0
+        from studio import mesh_python
+        worker=mesh_python()
+        ready=bool(worker) and subprocess.run([str(worker),'-c','import mediapipe,av,PIL,numpy'],capture_output=True).returncode==0
         print('Face mesh worker: '+('OK' if ready else 'MISSING — run bash setup-face-mesh.sh'))
         failed=failed or not ready
     missing=[]
