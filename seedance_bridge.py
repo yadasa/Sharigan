@@ -31,6 +31,34 @@ def _save(path, data):
     path.write_text(json.dumps(data, indent=2), encoding='utf-8')
 
 
+def validate_videos(paths):
+    """Reject invalid edit inputs before media upload or paid inference."""
+    import av
+    total = 0
+    for path in paths:
+        if path.suffix.lower() not in VIDEO_EXTENSIONS:
+            continue
+        if path.stat().st_size > 200 * 1024 * 1024:
+            raise ValueError('Each Seedance input video must be at most 200 MB.')
+        with av.open(str(path)) as source:
+            if not source.streams.video:
+                raise ValueError('An input video has no video stream.')
+            stream = source.streams.video[0]
+            duration = float(stream.duration * stream.time_base) if stream.duration else float(source.duration / av.time_base)
+            if not 4 <= duration <= 30.05:
+                raise ValueError('Seedance video-edit inputs must each be 4–30 seconds long.')
+            width, height = stream.width, stream.height
+            if not (300 <= width <= 6000 and 300 <= height <= 6000
+                    and 0.4 <= width / height <= 2.5
+                    and 407696 <= width * height <= 8295044):
+                raise ValueError('Seedance input dimensions are unsupported. Use at least a 480p-class source with aspect ratio between 0.4 and 2.5.')
+            if not stream.average_rate or not 24 <= float(stream.average_rate) <= 60:
+                raise ValueError('Seedance input videos must use 24–60 fps.')
+            total += duration
+    if total > 30.05:
+        raise ValueError('The source and identity reference videos must total at most 30 seconds. Use a shorter source or an image identity reference.')
+
+
 def _create(folder, payload, request_file, response_file):
     """Persist intent before transmission; ambiguous outcomes require inspection."""
     request_path, response_path = folder / request_file, folder / response_file
@@ -79,6 +107,7 @@ def submit(folder, prompt, reference, second_reference=None, status=print):
         if second.suffix.lower() not in {'.png', '.jpg', '.jpeg', '.webp'}:
             raise ValueError('The second reference must be an image.')
         paths.append(second)
+    validate_videos(paths)
     status('Uploading reviewed video and character references')
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
         urls = list(pool.map(upload, paths))
@@ -111,6 +140,7 @@ def submit(folder, prompt, reference, second_reference=None, status=print):
                'draft': True, 'resolution': '480p', 'ratio': 'adaptive', 'duration': -1,
                'omni_reference_task_type': 'edit', 'generate_audio': True,
                'watermark': False, 'output_format': 'mp4'}
+    require_approved(folder)
     ident = _create(folder, payload, 'seedance-request.json', 'seedance-response.json')
     _save(folder / 'generation.json', {'request_id': ident, 'prompt': instructions,
           'video': 'seedance-result.mp4', 'mode': 'edit', 'reference_type': 'video' if video_reference else 'image',
