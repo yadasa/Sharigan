@@ -6,6 +6,17 @@ from audio_workflow import finish_preview
 from pipeline import writer,put,finish,composite
 
 class MediaTests(unittest.TestCase):
+ def test_small_source_normalizes_to_valid_direct_api_dimensions(self):
+  from pipeline import normalize
+  from seedance_bridge import validate_videos
+  with tempfile.TemporaryDirectory() as directory:
+   p=Path(directory);source=p/'source.mp4';target=p/'prepared.mp4'
+   c,s=writer(source,64,64)
+   for i in range(96):put(c,s,np.full((64,64,3),70,dtype=np.uint8),i)
+   finish(c,s)
+   meta=normalize(source,target)
+   self.assertGreaterEqual(meta['width']*meta['height'],407696)
+   validate_videos([target])
  def test_final_audio_packets_equal_source(self):
   with tempfile.TemporaryDirectory() as directory:
    p=Path(directory)
