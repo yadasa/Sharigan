@@ -98,7 +98,7 @@ def media_info(path, source=False):
     except (OSError, av.error.FFmpegError) as exc:
         raise ValueError('This video could not be read. Try exporting an MP4 or MOV.') from exc
     issues = []
-    if not 4 <= duration <= 30.05:
+    if not 4 <= duration <= (30 if source else 30.05):
         issues.append('Choose a clip between 4 and 30 seconds; trim it in your video editor first.')
     if not video.height or not 0.4 <= video.width / video.height <= 2.5:
         issues.append('Use an aspect ratio between 0.4 and 2.5.')
