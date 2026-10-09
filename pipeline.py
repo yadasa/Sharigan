@@ -33,7 +33,10 @@ def normalize(src,dst):
         dur=float(vs.duration*vs.time_base) if vs.duration else float(inp.duration/av.time_base)
         if not 4 <= dur <= 30:raise ValueError('Use a 4–30 second clip for Seedance video editing.')
         it=iter(inp.decode(video=0));cur=next(it);start=float(cur.time or 0);nxt=next(it,None)
-        scale=min(1,960/max(cur.width,cur.height));w=max(2,int(cur.width*scale)//2*2);h=max(2,int(cur.height*scale)//2*2)
+        if not 0.4 <= cur.width/cur.height <= 2.5:raise ValueError('Seedance input aspect ratio must be between 0.4 and 2.5.')
+        # Meet the direct API's minimum pixel count even for small or wide sources.
+        scale=max(min(1,960/max(cur.width,cur.height)),(420000/(cur.width*cur.height))**0.5,300/min(cur.width,cur.height))
+        w=max(2,int(cur.width*scale)//2*2);h=max(2,int(cur.height*scale)//2*2)
         out,stream=writer(dst,w,h);count=round(dur*24)
         for i in range(count):
             t=i/24+start
