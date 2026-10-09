@@ -36,7 +36,7 @@ def _upload_once(path,host):
 def upload(path):
     """Retry hosting only; never retries a paid model request."""
     primary=setting('MEDIA_HOST','tmpfiles')
-    fallback=setting('MEDIA_HOST_FALLBACKS','catbox')
+    fallback=setting('MEDIA_HOST_FALLBACKS','')
     hosts=list(dict.fromkeys([primary]+[h.strip() for h in fallback.split(',') if h.strip()]))
     if any(h not in ['tmpfiles','catbox'] for h in hosts):raise ValueError('Supported media hosts: tmpfiles, catbox')
     errors=[]
