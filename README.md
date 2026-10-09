@@ -8,6 +8,8 @@ Sharingan replaces video characters while preserving the scene, performance and 
 
 The source code, documentation, included emblem and synthesized sound code are MIT licensed. Hosted models and API services are external, paid services with their own terms; their model weights are not bundled. Sharingan runs locally and calls Seedance directly through BytePlus ModelArk with your own key.
 
+![Sharingan studio](docs/studio-preview.jpg)
+
 ## Quick start
 
 Python 3.12+ and the Rubber Band CLI are required. No local GPU is needed for the default hosted preparation.
