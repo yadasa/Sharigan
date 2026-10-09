@@ -10,7 +10,7 @@ Mesh modes remain experimental for one centered speaker. Public hosting availabi
 
 ## Local verification on 2026-10-09
 
-- 28 automated tests passed on Windows with Python 3.12.8 and the pinned requirements.
+- 29 automated tests passed on Windows with Python 3.12.8 and the pinned requirements.
 - The standalone compositor check passed, including subject selection, retained background and aligned output frames.
 - JavaScript syntax checking passed. The localhost health/static routes and generic reference form schema passed.
 - Desktop and 390-pixel mobile layouts were visually inspected in Chrome. The configuration modal and opt-in sound toggle worked, with no captured browser console errors.
