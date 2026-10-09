@@ -7,8 +7,9 @@ def run(src,folder,status=print):
     from pipeline import normalize
     from audio_workflow import separate,prepare_seedance_video
     folder=Path(folder)
-    python=ROOT/'.venv-face/bin/python'
-    if not python.exists():raise ValueError('Fast face mesh needs setup: bash setup-face-mesh.sh (Python 3.12).')
+    from studio import mesh_python
+    python=mesh_python()
+    if not python:raise ValueError('Fast face mesh needs setup: bash setup-face-mesh.sh (Python 3.12).')
     folder.mkdir(parents=True,exist_ok=True)
     status('Normalizing video');normalize(src,folder/'original.mp4')
     status('Tracking face mesh locally · no depth or SAM')
@@ -23,8 +24,9 @@ def run_depth(src,folder,prompt='person',provider='replicate',status=print):
     from pipeline import run as run_advanced
     from audio_workflow import prepare_seedance_video
     folder=Path(folder)
-    python=ROOT/'.venv-face/bin/python'
-    if not python.exists():raise ValueError('Install face mesh first: bash setup-face-mesh.sh')
+    from studio import mesh_python
+    python=mesh_python()
+    if not python:raise ValueError('Install face mesh first: bash setup-face-mesh.sh')
     folder.mkdir(parents=True,exist_ok=True)
     run_advanced(src,folder,prompt,provider,status)
     shutil.copy2(folder/'composite-silent.mp4',folder/'depth-composite-silent.mp4')
