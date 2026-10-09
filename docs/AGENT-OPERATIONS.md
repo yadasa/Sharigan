@@ -21,12 +21,14 @@ Omit `--approve` on the review command to record rejection. `repair-rgb` incurs 
 
 State the real number of subjects, exact identity mapping and reference tokens for the selected mode. Keep appearance references separate from motion/audio. Replace the whole subject in every frame, including hair and clothing outside an imperfect depth silhouette; require matching short hair if the identity has short hair. Keep camera, crop, scene, lighting and timing. Include the verified source dialogue verbatim when known, with exact timing; do not invent a transcript. Use only prepared input's embedded audio for lip synchronization. Preserve source soundtrack in the final mux regardless of generated audio.
 
-Show the creative prompt before submission. The adapter appends audio/reference instructions saved in `seedance-request.json`; inspect these as well. Prior explicit submission approval remains valid. A new paid creative variation should use a new prepared job rather than overwriting an existing request ID. HD requires explicit approval.
+Show the exact composed prompt before submission. The UI's **Review submission** uses the same `seedance_bridge.compose_prompt` function as the adapter and includes all appended audio/reference guidance and subject mappings. CLI agents can call that builder locally with their prepared folder, creative prompt and reference paths before showing the text. Prior explicit submission approval remains valid. A new paid creative variation should use a new prepared job rather than overwriting an existing request ID. HD requires explicit approval.
 
 ## Review and recovery
 
 Play Mask and Prepared input end-to-end, across cuts and occlusions. Check complete subject coverage, no holes in clothes/arms, hair/hands/feet, chair/background exclusion, border fragments and frame-to-frame stability. Review again after any repair. Never auto-approve solely because inference succeeded.
 
 Replicate prediction responses are saved as `audio-prediction.json`, `sam-raw-request.json`, and depth request metadata. On interruption inspect their IDs/status URLs; retrieve completed output before deciding whether to retry. Preparation does not automatically resume every interrupted stage. Seedance response IDs are persisted; startup and `resume` collect them without a new paid queue call.
+
+The UI exposes RGB mask repair, saved-task collection, recent transformations, naming, persisted processing activity and draft/final selection. Repair clears approval before mutation and is blocked for submitted inputs. Submission previews are bound to the current input, references and API configuration; they must be regenerated after changes. UI inspection is local and never substitutes for complete visual input review.
 
 If queue POST times out before a response ID is saved, check the provider dashboard. Stop automatic retries on this ambiguous outcome. Poll timeouts do not mean a job failed. Report provider failures with the local job/request ID, never credentials. Keep the server running until preview is saved. When completed, show `/runs/LOCAL_JOB_ID/final-preview.mp4` (or `hd/final-preview.mp4`).
