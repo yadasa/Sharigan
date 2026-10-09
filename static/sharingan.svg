@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+<defs><radialGradient id="iris"><stop stop-color="#f34e56"/><stop offset=".62" stop-color="#d51d34"/><stop offset="1" stop-color="#8c1026"/></radialGradient></defs>
+<circle cx="100" cy="100" r="95" fill="#0c0c11" stroke="#e53b4b" stroke-width="2"/>
+<circle cx="100" cy="100" r="83" fill="url(#iris)"/>
+<circle cx="100" cy="100" r="54" stroke="#260912" stroke-width="3"/>
+<circle cx="100" cy="100" r="18" fill="#0c0c11"/>
+<g fill="#0c0c11"><path id="tomoe" d="M100 33c-15-2-25 8-23 20 2 11 16 15 24 7 6-6 4-15-2-18 9-2 18 2 24 9-3-10-11-17-23-18Z"/>
+<use href="#tomoe" transform="rotate(120 100 100)"/><use href="#tomoe" transform="rotate(240 100 100)"/></g>
+<circle cx="100" cy="100" r="81" stroke="#ff7481" stroke-opacity=".2" stroke-width="2"/>
+</svg>
