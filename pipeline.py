@@ -31,7 +31,7 @@ def normalize(src,dst):
     with av.open(str(src)) as inp:
         vs=inp.streams.video[0];rate=float(vs.average_rate or 24)
         dur=float(vs.duration*vs.time_base) if vs.duration else float(inp.duration/av.time_base)
-        if dur>30:raise ValueError('Use a clip of 30 seconds or less for this hosted workflow.')
+        if not 4 <= dur <= 30:raise ValueError('Use a 4–30 second clip for Seedance video editing.')
         it=iter(inp.decode(video=0));cur=next(it);start=float(cur.time or 0);nxt=next(it,None)
         scale=min(1,960/max(cur.width,cur.height));w=max(2,int(cur.width*scale)//2*2);h=max(2,int(cur.height*scale)//2*2)
         out,stream=writer(dst,w,h);count=round(dur*24)
@@ -128,8 +128,8 @@ def composite(original,depth,seg,directory,audio_source=None):
 def run(src,directory,prompt='person',provider='replicate',status=print):
     directory=Path(directory);directory.mkdir(parents=True,exist_ok=True)
     from audio_workflow import separate
-    separate(src,directory,status)
     status('Preparing video · 24 fps');meta=normalize(src,directory/'original.mp4')
+    separate(src,directory,status)
     status('Video Depth Anything · generating depth')
     if provider=='huggingface':depth_hf(directory/'original.mp4',directory/'depth-raw.mp4')
     else:depth_replicate(directory/'original.mp4',directory/'depth-raw.mp4', 'chenxwh/depth-any-video' if provider=='replicate-chenxwh' else 'lucataco/depth-anything-video')
