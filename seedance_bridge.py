@@ -84,7 +84,34 @@ def _create(folder, payload, request_file, response_file):
     return ident
 
 
-def submit(folder, prompt, reference, second_reference=None, status=print):
+def compose_prompt(folder, prompt, reference, second_reference=None):
+    """One prompt builder for preview, CLI and paid submission."""
+    from mask_review import is_mesh
+    folder = Path(folder)
+    description = 'colored-depth composite'
+    if is_mesh(folder):
+        mode = json.loads((folder / 'workflow-mode.json').read_text())['mode']
+        description = 'depth composite with face mesh overlay' if mode == 'depth_mesh' else 'original video with face mesh overlay'
+    instructions = ('Video edit: edit @Video1 using the supplied character identity references.\n' +
+        prompt.replace('@Audio1', 'the audio embedded in @Video1') +
+        '\n@Video1 is the source to edit: ' + description +
+        ' with isolated vocals pitched +3 semitones. Use only its embedded speech for performance and lip synchronization. Preserve the source framing, background and timing.')
+    video_reference = Path(reference).suffix.lower() in VIDEO_EXTENSIONS
+    if video_reference:
+        instructions += '\n@Video2 is only the primary character visual identity reference; do not use its voice, performance or timing.'
+        if second_reference:
+            instructions += ' @Image1 is the secondary character reference.'
+    else:
+        instructions += '\n@Image1 is the primary character reference.'
+        if second_reference:
+            instructions += ' @Image2 is the secondary character reference.'
+    instructions += '\nRemove depth colors and all guidance overlays from the output. Replace the entire original identity including hair.'
+    if is_mesh(folder):
+        instructions += ' Remove all face mesh lines; use them only for expression and lip motion guidance.'
+    return instructions
+
+
+def submit(folder, prompt, reference, second_reference=None, status=print, expected_prompt=None):
     from mask_review import require_approved, is_mesh
     folder = Path(folder)
     require_approved(folder)
@@ -108,29 +135,13 @@ def submit(folder, prompt, reference, second_reference=None, status=print):
             raise ValueError('The second reference must be an image.')
         paths.append(second)
     validate_videos(paths)
+    instructions = compose_prompt(folder, prompt, reference, second_reference)
+    if expected_prompt is not None and instructions != expected_prompt:
+        raise ValueError('The prompt changed. Review a new submission preview before generating.')
+    video_reference = paths[1].suffix.lower() in VIDEO_EXTENSIONS
     status('Uploading reviewed video and character references')
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
         urls = list(pool.map(upload, paths))
-    description = 'colored-depth composite'
-    if is_mesh(folder):
-        mode = json.loads((folder / 'workflow-mode.json').read_text())['mode']
-        description = 'depth composite with face mesh overlay' if mode == 'depth_mesh' else 'original video with face mesh overlay'
-    instructions = ('Video edit: edit @Video1 using the supplied character identity references.\n' +
-        prompt.replace('@Audio1', 'the audio embedded in @Video1') +
-        '\n@Video1 is the source to edit: ' + description +
-        ' with isolated vocals pitched +3 semitones. Use only its embedded speech for performance and lip synchronization. Preserve the source framing, background and timing.')
-    video_reference = paths[1].suffix.lower() in VIDEO_EXTENSIONS
-    if video_reference:
-        instructions += '\n@Video2 is only the primary character visual identity reference; do not use its voice, performance or timing.'
-        if second_reference:
-            instructions += ' @Image1 is the secondary character reference.'
-    else:
-        instructions += '\n@Image1 is the primary character reference.'
-        if second_reference:
-            instructions += ' @Image2 is the secondary character reference.'
-    instructions += '\nRemove depth colors and all guidance overlays from the output. Replace the entire original identity including hair.'
-    if is_mesh(folder):
-        instructions += ' Remove all face mesh lines; use them only for expression and lip motion guidance.'
     content = [{'type': 'text', 'text': instructions},
                {'type': 'video_url', 'video_url': {'url': urls[0]}, 'role': 'reference_video'}]
     for path, url in zip(paths[1:], urls[1:]):
